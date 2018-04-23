@@ -1,6 +1,10 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { ShowUsers }        from './show-users.component';
+import { HttpClient, HttpParams } from '@angular/common/http';
+
+import { ShowUsers } from './show-users.component';
+import { AppComponent } from './app.component';
+import { DataService } from './data.service';
 
 @Component({
     selector: 'chat',
@@ -37,24 +41,45 @@ import { ShowUsers }        from './show-users.component';
         `
     ],
     template: `
-        <h1>Для входа в чат, давайте представимся. Меня зовут Чат! {{name}}!</h1>
+        <h1>Для входа в чат, давайте представимся. Меня зовут Чат! {{name}}</h1>
         <label>А Вас?</label>
         <input [(ngModel)]="name" placeholder="name">
         <input [(ngModel)]="password" placeholder="password">
-        <input class="btn" type="button" value="Login">
-        <input class="btn" type="button" value="Register">
+        <input class="btn" type="button" value="Login" (click)="checkUser(name, password)">
+        <input class="btn" type="button" value="Register" (click)="remindPassword()">
         <input class="btn" type="button" value="Remind password" (click)="remindPassword()">    
         `
 
 })
 
-export class Login { 
-    constructor(private router: Router){}
+export class Login {
+
+    //private dataService = new DataService();
+    constructor(private router: Router,
+        private http: HttpClient,
+        private dataService: DataService) { 
+
+            console.log(dataService);
+        }
+        
+    checkUser(name: string, password: string): void {
+        const user = {
+            name: name,
+            password: password
+        }
+
+        this.http.get(`http://localhost:3000/api/checkuser/${JSON.stringify(user)}`).subscribe((data: any) => {
+            this.dataService.user.id = data;
+            this.dataService.user.name = user.name;
+            this.router.navigate(['']);
+        });
+    }
     remindPassword(): void {
         this.router.navigate(['showusers']);
     };
     usr = {
         name: '',
-        password: ''};
-    
+        password: ''
+    };
+
 }

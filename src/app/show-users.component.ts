@@ -124,6 +124,7 @@ import { HttpClient } from '@angular/common/http';
             color: #337ab7;
             text-decoration: none;
             background-color: transparent;
+            cursor:pointer;
         }
         a.editLink:focus {
             outline: 5px auto -webkit-focus-ring-color;
@@ -158,7 +159,7 @@ import { HttpClient } from '@angular/common/http';
             </div>
             <div class="panel-body">
                 <button (click)="editUser()" type="submit" class="btn">Сохранить</button>
-                <a (click)="editUser()" id="reset" class="btn">Сбросить</a>
+                <a (click)="resetUser()" id="reset" class="btn">Сбросить</a>
             </div>
         </form>
         <table class="table">
@@ -178,7 +179,7 @@ import { HttpClient } from '@angular/common/http';
                     <td>{{ user.age }}</td>
                     <td>{{ user.password }}</td>
                     <td>
-                        <a (click)="getUser(user)" class='editLink' data-id='{{user.id}}'>Изменить</a> | <a class='editLink' data-id='{{user.id}}'>Удалить</a>
+                        <a (click)="getUser(user)" class='editLink' data-id='{{user.id}}'>Изменить</a> | <a (click)="deleteUser(user)" class='editLink' data-id='{{user.id}}'>Удалить</a>
                     </td>
                 </tr>
             </tbody>
@@ -192,38 +193,64 @@ export class ShowUsers {
     private userName: string;
     private userAge: string;
     private userPassword: string;
-    getUser(user: any) {
-        //console.log(user);
+    getUser(user: any): void {
         this.http.get(`http://localhost:3000/api/users/${user.id}`).subscribe((data: any) => {
-            //console.log(data);
             this.userId = data.id;
             this.userName = data.name;
             this.userAge = data.age;
             this.userPassword = data.password;
         });
     }
+
+    deleteUser(user: any): void {
+        this.http.delete(`http://localhost:3000/api/users/${user.id}`).subscribe((data: any) => {
+            this.getUsers();
+            console.log(data);
+        });
+    }
+
+    resetUser(): void {
+
+        this.userId = '';
+        this.userName = '';
+        this.userAge = '';
+        this.userPassword = '';
+    }
+
     editUser() {
-        
+
         let user = {
-            id: ''+this.userId,
+            id: '' + this.userId,
             name: this.userName,
             password: this.userPassword,
             age: this.userAge
         };
-        this.http.put('http://localhost:3000/api/users', user).subscribe((data: any) => {
-            this.userId = '0';
-            this.userName = '';
-            this.userAge = '';
-            this.userPassword = '';
-            console.log(data);
-        });
+
+        console.log(user);
+        if (!user.id) {
+            this.http.put('http://localhost:3000/api/users', user).subscribe((data: any) => {
+                this.resetUser();
+                this.getUsers();
+                //console.log(data);
+
+            });
+        } else {
+            this.http.post('http://localhost:3000/api/users', user).subscribe((data: any) => {
+                this.resetUser();
+                this.getUsers();
+                console.log(data);
+            });
+        }
     }
-    constructor(private http: HttpClient) { }
-    ngOnInit() {
+    getUsers(): void {
         this.http.get('http://localhost:3000/api/users').subscribe((data: any) => {
             var rows = "";
             this.users = data;
             console.log(data);
         });
+    }
+    constructor(private http: HttpClient) { }
+    ngOnInit() {
+        this.getUsers();
     }
 }

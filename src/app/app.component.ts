@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { DataService } from './data.service';
+import { debug } from 'util';
 
 @Component({
     selector: 'my-app',
@@ -13,14 +15,21 @@ import { Router } from '@angular/router';
         </div>
         `
 })
+
 export class AppComponent {
 
-    private activeUser = {
-        userId: ''
-    }
-    constructor(private router: Router) {
-        if (this.activeUser.userId == '') {
+    constructor(private router: Router, private dataService: DataService) {
+
+        debug;
+        //debug('1');
+        console.log(debug, typeof(debug));
+        debugger;
+        if (this.dataService.user.id == '') {
             this.router.navigate(['login']);
-        }
+        } else this.router.navigate(['chat']);
+    }
+
+    ngAfterViewInit() {
+
     }
 }
